@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"log"
 	"path/filepath"
+	"strings"
 
 	"github.com/sebojanko/epub/epub"
 	"github.com/spf13/cobra"
@@ -33,10 +34,16 @@ func index(dir string) {
 		}
 
 		bookInfo := epub.GetMetadata(path)
+		descript := strings.Trim(bookInfo.Metadata.Description, " ")
+		descript = strings.TrimSuffix(descript, "</p>")
+		descript = strings.TrimPrefix(descript, `<p class="description">`)
+		descript = strings.TrimPrefix(descript, `<div>`)
+		descript = strings.TrimSuffix(descript, "</div>")
+
 		book := Epub{
 			Path:     path,
 			Title:    bookInfo.Metadata.Title,
-			Descript: bookInfo.Metadata.Description,
+			Descript: descript,
 		}
 		if e := book.Insert(); e != nil {
 			log.Printf("无法保存书籍 %s %s", book.Title, err)
